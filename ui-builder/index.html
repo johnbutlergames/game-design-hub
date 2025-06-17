@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>UI Builder</title>
+</head>
+
+<body>
+    <script type="module">
+        import GameDesign from "../components/everything.js";
+        window.GameDesign = GameDesign;
+    </script>
+    <script src="main.js"></script>
+    <canvas id="canvas"></canvas>
+    <script>
+        function init() {
+            var canvas = document.getElementById("canvas");
+            var Mouse = new GameDesign.Input.MouseTracker(canvas);
+        }
+        window.addEventListener("load", init);
+    </script>
+</body>
+
+</html>
