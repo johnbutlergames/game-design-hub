@@ -37,7 +37,7 @@ class MouseTracker {
         this.ymove += event.movementY * this.canvas.height / rect.height;
     }
     link(canvas) {
-        this.canvas = canvas;
+        this.canvas = canvas.element;
         window.addEventListener("mousemove", event => {
             this.updatePosition(event);
         });
@@ -56,11 +56,12 @@ class MouseTracker {
             this.clickButtons[event.button] = true;
         });
         window.addEventListener("wheel", event => {
+            event.preventDefault();
             this.updatePosition(event);
             this.scrollX += event.deltaX;
             this.scrollY += event.deltaY;
-        });
-        window.oncontextmenu = function(event) {
+        }, { passive: false });
+        window.oncontextmenu = function (event) {
             event.preventDefault();
         }
     }

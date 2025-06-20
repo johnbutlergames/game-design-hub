@@ -1,5 +1,4 @@
 import MouseTracker from "./mouse-tracker.js";
-let Input = {
+export default {
     MouseTracker: MouseTracker
 };
-export default Input;

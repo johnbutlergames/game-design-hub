@@ -14,10 +14,19 @@
     <script src="main.js"></script>
     <canvas id="canvas"></canvas>
     <script>
+        let mouse, canvas, ctx, env;
+
         function init() {
-            var canvas = document.getElementById("canvas");
-            var Mouse = new GameDesign.Input.MouseTracker(canvas);
+            canvas = new GameDesign.Canvas.FullscreenCanvas();
+            ctx = canvas.ctx;
+            mouse = new GameDesign.Input.MouseTracker(canvas);
+            env = new GameDesign.BuildEnvironment();
+            env.linkCanvas(canvas);
+            env.linkMouse(mouse);
+
+            window.setInterval(main, 10);
         }
+        
         window.addEventListener("load", init);
     </script>
 </body>
