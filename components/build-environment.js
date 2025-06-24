@@ -1,4 +1,5 @@
 import UI from "./ui/everything.js";
+import Physics from "./physics/everything.js";
 
 class BuildEnvironment {
     cam = {
@@ -129,11 +130,64 @@ class BuildEnvironment {
         }
     }
     selection = {
-        selectedObject: null,
-        update: function() {
-
+        selectedObjects: [],
+        selectBox: null,
+        update: () => {
+            this.selection.updateSelectBox();
         },
-        draw: function() {
+        updateSelectBox: () => {
+            let selectBoxChange = false;
+            if (this.mouse.startButtons[2]) {
+                this.selection.selectBox = {
+                    x1: this.globalMouse.x,
+                    y1: this.globalMouse.y,
+                    x2: this.globalMouse.x,
+                    y2: this.globalMouse.y
+                };
+                selectBoxChange = true;
+            }
+            if (this.mouse.buttons[2]) {
+                if (this.globalMouse.x != this.selection.selectBox.x2) selectBoxChange = true;
+                if (this.globalMouse.y != this.selection.selectBox.y2) selectBoxChange = true;
+                this.selection.selectBox.x2 = this.globalMouse.x;
+                this.selection.selectBox.y2 = this.globalMouse.y;
+                let x1 = Math.min(this.selection.selectBox.x1, this.selection.selectBox.x2);
+                let x2 = Math.max(this.selection.selectBox.x1, this.selection.selectBox.x2);
+                let y1 = Math.min(this.selection.selectBox.y1, this.selection.selectBox.y2);
+                let y2 = Math.max(this.selection.selectBox.y1, this.selection.selectBox.y2);
+                let w = x2 - x1;
+                let h = y2 - y1;
+                this.selection.selectBox.x = x1;
+                this.selection.selectBox.y = y1;
+                this.selection.selectBox.w = w;
+                this.selection.selectBox.h = h;
+                this.selection.selectBox.area = w * h;
+            } else if (this.selection.selectBox) {
+                this.selection.selectBox = null;
+            }
+            if (selectBoxChange) this.selection.getSelectedObjectsForSelectBox();
+        },
+        getSelectedObjectsForSelectBox: () => {
+            this.selection.selectedObjects = this.objects.filter(e => Physics.rectanglesColliding(this.selection.selectBox, e));
+        },
+        draw: () => {
+            if (this.selection.selectBox) {
+                this.ctx.fillStyle = "rgba(100,150,255,0.1)";
+                this.ctx.strokeStyle = "rgb(50,100,255)";
+                this.ctx.lineWidth = 1 / this.cam.zoom;
+                let box = this.selection.selectBox;
+                this.ctx.beginPath();
+                this.ctx.rect(box.x, box.y, box.w, box.h);
+                this.ctx.fill();
+                this.ctx.stroke();
+            }
+            for (var o of this.selection.selectedObjects) {
+                this.ctx.lineWidth = 5 / this.cam.zoom;
+                this.ctx.strokeStyle = "rgb(50,100,255)";
+                this.ctx.strokeRect(o.x, o.y, o.w, o.h);
+            }
+        },
+        drawUI: () => {
 
         }
     }
@@ -141,7 +195,10 @@ class BuildEnvironment {
         this.ctx = null;
         this.canvas = null;
         this.mouse = null;
-        this.objects = [];
+        this.objects = [
+            { type: "rectangle", x: 0, y: 0, w: 100, h: 100 },
+            { type: "rectangle", x: 200, y: 0, w: 100, h: 100 }
+        ];
     }
     linkCanvas(canvas) {
         this.canvas = canvas;
@@ -156,6 +213,7 @@ class BuildEnvironment {
     }
     update() {
         this.cam.update();
+        this.selection.update();
     }
     draw() {
         this.ctx.save();
@@ -163,13 +221,16 @@ class BuildEnvironment {
 
         this.adaptiveGrid.draw();
 
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(this.globalMouse.x, this.globalMouse.y, 10, 10);
         for (var o of this.objects) {
-
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(o.x, o.y, o.w, o.h);
         }
 
+        this.selection.draw();
+
         this.ctx.restore();
+
+        this.selection.drawUI();
     }
 
 }

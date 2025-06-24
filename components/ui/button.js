@@ -1,4 +1,6 @@
-class Button {
+import Box from "./box.js";
+
+class Button extends Box.Box {
     constructor() {
     }
 }
